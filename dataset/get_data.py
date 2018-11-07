@@ -6,14 +6,55 @@ Created on Tue Nov  6 17:11:52 2018
 @author: salar
 """
 
-import urllib
+import urllib.request as urllib2
+import numpy as np
 
-URL = "https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318&markers=color:red%7Clabel:C%7C40.718217,-73.998284&key="
-api_key = "AIzaSyCQTd-Qkwwpn6tbEa8-jHNgQjedOyrjvQs"
 
-#URL = "https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap
-#&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318
-#&markers=color:red%7Clabel:C%7C40.718217,-73.998284
-#&key=AIzaSyCQTd-Qkwwpn6tbEa8-jHNgQjedOyrjvQs"
+def save_image(longitude, latitude):
+  
+  longitude = str(longitude)
+  latitude = str(latitude)
+  
+  api = "https://maps.googleapis.com/maps/api/staticmap?"
+  center = "center="+longitude+","+latitude
+  zoom = "zoom=19"
+  size = "size=800x800"
+  map_type = "maptype=satellite"
+  api_key = "key=AIzaSyCQTd-Qkwwpn6tbEa8-jHNgQjedOyrjvQs"
+  
+  URL = api+center+"&"+zoom+"&"+size+"&"+map_type+"&"+api_key
+  
+  print(URL)
+  
+  urllib2.urlretrieve(URL, "00000001.png")
+  
+  
 
-urllib.request.urlretrieve(URL+api_key, "00000001.png")
+
+add_plus_minus = np.random.uniform(low=0.0, high=0.013818, size=(100,2))
+
+start_long = 40.718317
+start_lat   = -73.998384
+
+save_image(1,2)
+
+for i in range(add_plus_minus.shape[0]):
+  longitude = start_long + add_plus_minus[i][0]
+  latitude  = start_lat   + add_plus_minus[i][1]
+  longitude = np.round_(longitude, decimals=6)
+  latitude  = np.round_(latitude, decimals=6)
+  
+  print('Saving image for longitude=%f and latitude=%f' % (longitude, latitude))
+  save_image(longitude,latitude)
+  
+  from IPython.display import Image, display
+  display(Image(filename='00000001.png'))
+  
+  print('Continue?[y/n]')
+  cmd = input()
+  if cmd == 'y':
+    continue
+  else:
+    break
+  
+print('End of script')
