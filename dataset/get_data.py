@@ -17,7 +17,7 @@ def save_image(longitude, latitude):
   
   api = "https://maps.googleapis.com/maps/api/staticmap?"
   center = "center="+longitude+","+latitude
-  zoom = "zoom=19"
+  zoom = "zoom=20"
   size = "size=800x800"
   map_type = "maptype=satellite"
   api_key = "key=AIzaSyCQTd-Qkwwpn6tbEa8-jHNgQjedOyrjvQs"
@@ -26,7 +26,7 @@ def save_image(longitude, latitude):
   
   print(URL)
   
-  urllib2.urlretrieve(URL, "00000001.png")
+  urllib2.urlretrieve(URL, "00000003.png")
   
   
 
@@ -48,7 +48,7 @@ for i in range(add_plus_minus.shape[0]):
   save_image(longitude,latitude)
   
   from IPython.display import Image, display
-  display(Image(filename='00000001.png'))
+  display(Image(filename='00000003.png'))
   
   print('Continue?[y/n]')
   cmd = input()
