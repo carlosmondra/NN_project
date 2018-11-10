@@ -4,6 +4,7 @@ import torchvision
 import torchvision.transforms as transforms
 import os
 import PIL.Image
+from PIL import Image
 import numpy as np
 
 transform = transforms.Compose([
@@ -127,3 +128,41 @@ for epoch in range(10):
         print(loss.data[0])
         
         optimizer.step()
+        
+def show_img(pt_tensor):
+  y_pred_np = pt_tensor.cpu().detach().numpy()
+  #get the first image and the red color channel
+  img_r = y_pred_np[0][1]
+  
+  img = np.array([img_r, np.zeros((640,640)), np.zeros((640,640))])
+  
+  img = img.transpose(1,2,0)
+  img = Image.fromarray(img, 'RGB')
+  img.save('preview.png')
+  img.show()
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
