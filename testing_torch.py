@@ -12,26 +12,27 @@ transform = transforms.Compose([
 ])
 
 class TensorDataset(torch.utils.data.Dataset):
-    def __init__(self,root_dir,transform=transforms.ToTensor()):
+    def __init__(self,raw_imgs_dir,masks_dir,transform=transforms.ToTensor()):
         """
         Args:
-        root_dir(string): directory with all train images
+        raw_imgs_dir(string): directory with all train images
         """
-        self.root_dir = root_dir
+        self.raw_imgs_dir = raw_imgs_dir
+        self.masks_dir = masks_dir
         self.transform = transform
 
     def __len__(self):
-        return 2
+        return len([name for name in os.listdir(self.raw_imgs_dir) if os.path.isfile(os.path.join(self.raw_imgs_dir, name))])
 
     def __getitem__(self, idx):
         str_idx = str(idx + 1)
         img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
-        img_path = os.path.join(self.root_dir, img_name)
+        img_path = os.path.join(self.raw_imgs_dir, img_name)
         image = PIL.Image.open(img_path).convert('RGB')
         image = self.transform(image)
         
         #resides in 'NN_project/dataset/masks'
-        mask_path = os.path.join(self.root_dir, img_name)
+        mask_path = os.path.join(self.masks_dir, img_name)
         mask = PIL.Image.open(img_path).convert('RGB')
         mask = np.array(mask)
         mask = mask.transpose((2,0,1)) #transpose ot get color channel as first dimension
@@ -40,7 +41,7 @@ class TensorDataset(torch.utils.data.Dataset):
         label_road = (mask_road[:][:]==255)*1
         label_empty = (mask_road[:][:]!=255)*1
         
-        labels = np.array([label_road, label_empty]).type(torch.cuda.LongTensor)
+        labels = torch.from_numpy(np.array([label_road, label_empty])).type(torch.cuda.LongTensor)
         
         #labels = torch.randint(2, (2,640,640)).type(torch.cuda.LongTensor)
         sample = {'image': image, 'labels': labels}
@@ -48,10 +49,10 @@ class TensorDataset(torch.utils.data.Dataset):
         return sample
 
 # Testing Data
-# dataset = TensorDataset('dataset', transform=transform)
-# loader = torch.utils.data.DataLoader(dataset, batch_size=20)
+# dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
+# loader = torch.utils.data.DataLoader(dataset)
 # for sample in loader:
-#     print(sample['image'].size())
+#     print(sample['labels'].size())
 
 import torch.nn.functional as F
 class Model(torch.nn.Module):
@@ -76,7 +77,7 @@ class Model(torch.nn.Module):
         h1 = self.max_pool(self.relu(self.conv1(x)))
         # h2 = self.max_pool(self.relu(self.conv2(h1)))
         # h3 = self.max_pool(self.relu(self.conv2(h2)))
-        
+
         # h4 = self.relu(self.conv4(h3))
         # h5 = self.upsample(self.relu(self.conv4(h4)))
 
@@ -86,7 +87,7 @@ class Model(torch.nn.Module):
         h8 = self.relu(self.conv6(h7))
 
         # x = F.relu(self.conv1(x))
-       return h8
+        return h8
 
 # Testing Softmax
 # dtype = torch.cuda.FloatTensor
