@@ -77,15 +77,15 @@ class Model(torch.nn.Module):
     def forward(self, x):
         # This are dummy declarations
         h1 = self.max_pool(self.relu(self.conv1(x)))
-        h2 = self.max_pool(self.relu(self.conv2(h1)))
-        h3 = self.max_pool(self.relu(self.conv3(h2)))
+        # h2 = self.max_pool(self.relu(self.conv2(h1)))
+        # h3 = self.max_pool(self.relu(self.conv3(h2)))
 
-        h4 = self.relu(self.conv4(h3))
-        h5 = self.upsample(self.relu(self.conv4(h4)))
+        # h4 = self.relu(self.conv4(h3))
+        # h5 = self.upsample(self.relu(self.conv4(h4)))
 
-        h6 = self.upsample(self.relu(self.conv5(h5)))
-        h7 = self.upsample(self.relu(self.conv6(h6)))
-        # h7 = self.upsample(h1)
+        # h6 = self.upsample(self.relu(self.conv5(h5)))
+        # h7 = self.upsample(self.relu(self.conv6(h6)))
+        h7 = self.upsample(h1)
         h8 = self.relu(self.conv7(h7))
 
         # x = F.relu(self.conv1(x))
@@ -114,7 +114,7 @@ learning_rate = 1e-4
 # I haven't check the optimizer
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-for epoch in range(100):
+for epoch in range(10):
     for x_batch, y_batch in loader:
         x_var = Variable(x_batch)
         y_var = Variable(y_batch)
@@ -132,9 +132,11 @@ for epoch in range(100):
 def show_img(pt_tensor):
     y_pred_np = pt_tensor.cpu().detach().numpy()
     #get the first image and the red color channel
-    img_r = y_pred_np[0][1]*255
-    print(img_r)
-    img = np.array([img_r, np.zeros((640,640)), np.zeros((640,640))])
+    img_r = y_pred_np[0][0]
+    img_b = y_pred_np[0][1]
+    img_g = (img_r < img_b) * 255
+    print(img_g)
+    img = np.array([img_g, np.zeros((640,640)), np.zeros((640,640))])
 
     img = img.transpose(1,2,0)
     img = Image.fromarray(img, 'RGB')
@@ -142,7 +144,7 @@ def show_img(pt_tensor):
     img.show()
 
 show_img(y_pred)
-#print(y_pred)
+print(y_var)
 
   
   
