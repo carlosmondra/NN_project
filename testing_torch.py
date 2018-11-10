@@ -4,6 +4,7 @@ import torchvision
 import torchvision.transforms as transforms
 import os
 import PIL.Image
+import numpy as np
 
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -28,8 +29,20 @@ class TensorDataset(torch.utils.data.Dataset):
         img_path = os.path.join(self.root_dir, img_name)
         image = PIL.Image.open(img_path).convert('RGB')
         image = self.transform(image)
-
-        labels = torch.randint(2, (2,640,640)).type(torch.cuda.LongTensor)
+        
+        #resides in 'NN_project/dataset/masks'
+        mask_path = os.path.join(self.root_dir, img_name)
+        mask = PIL.Image.open(img_path).convert('RGB')
+        mask = np.array(mask)
+        mask = mask.transpose((2,0,1)) #transpose ot get color channel as first dimension
+        mask_road = mask[0]
+        
+        label_road = (mask_road[:][:]==255)*1
+        label_empty = (mask_road[:][:]!=255)*1
+        
+        labels = np.array([label_road, label_empty]).type(torch.cuda.LongTensor)
+        
+        #labels = torch.randint(2, (2,640,640)).type(torch.cuda.LongTensor)
         sample = {'image': image, 'labels': labels}
 
         return sample
