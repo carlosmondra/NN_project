@@ -29,7 +29,7 @@ class TensorDataset(torch.utils.data.Dataset):
         img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
         img_path = os.path.join(self.raw_imgs_dir, img_name)
         image = PIL.Image.open(img_path).convert('RGB')
-        image = self.transform(image)
+        image = self.transform(image).type(torch.cuda.FloatTensor)
         
         #resides in 'NN_project/dataset/masks'
         mask_path = os.path.join(self.masks_dir, img_name)
@@ -41,10 +41,11 @@ class TensorDataset(torch.utils.data.Dataset):
         label_road = (mask_road[:][:]==255)*1
         label_empty = (mask_road[:][:]!=255)*1
         
-        labels = torch.from_numpy(np.array([label_road, label_empty])).type(torch.cuda.LongTensor)
+        labels = torch.from_numpy(label_road).type(torch.cuda.LongTensor)
         
         #labels = torch.randint(2, (2,640,640)).type(torch.cuda.LongTensor)
-        sample = {'image': image, 'labels': labels}
+        # sample = {'image': image, 'labels': labels}
+        sample = (image, labels)
 
         return sample
 
@@ -84,7 +85,7 @@ class Model(torch.nn.Module):
         # h6 = self.upsample(self.relu(self.conv5(h5)))
         # h7 = self.upsample(self.relu(self.conv6(h6)))
         h7 = self.upsample(h1)
-        h8 = self.relu(self.conv6(h7))
+        h8 = self.relu(self.conv7(h7))
 
         # x = F.relu(self.conv1(x))
         return h8
@@ -93,6 +94,8 @@ class Model(torch.nn.Module):
 # dtype = torch.cuda.FloatTensor
 # inpt = Variable(torch.tensor([[[[10., 0.], [0., 0.]],[[0., 10.], [10., 10.]]]]).type(dtype))
 # target = Variable(torch.tensor([[[0, 1], [1, 1]]]).type(torch.cuda.LongTensor))
+# print(inpt.size())
+# print(target.size())
 # loss = torch.nn.CrossEntropyLoss()
 # soft = loss(inpt, target)
 # print(soft)
@@ -100,23 +103,27 @@ class Model(torch.nn.Module):
 
 # dtype = torch.cuda.FloatTensor
 
-# dataset = TensorDataset('dataset', transform=transform)
-# loader = torch.utils.data.DataLoader(dataset, batch_size=20)
-# model = Model()
+dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
+loader = torch.utils.data.DataLoader(dataset, batch_size=1)
+model = Model().cuda()
 
-# # Check CrossEntropy options
-# loss = torch.nn.CrossEntropyLoss()
-# learning_rate = 1e-4
-# # I haven't check the optimizer
-# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+# Check CrossEntropy options
+loss_fn = torch.nn.CrossEntropyLoss()
+learning_rate = 1e-4
+# I haven't check the optimizer
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-# for epoch in range(10)
-#     for x_batch, y_batch in loader:
-#         x_var, y_var = Variable(x_batch), Variable(y_batch)
-#         y_pred = model(x_var)
-#         loss = loss_fn(y_pred, y_var)
+for epoch in range(10):
+    for x_batch, y_batch in loader:
+        x_var = Variable(x_batch)
+        y_var = Variable(y_batch)
+        y_pred = model(x_var)
 
-#         optimizer.zero_grad()
-#         loss.backward()
+        loss = loss_fn(y_pred, y_var)
+
+        optimizer.zero_grad()
+        loss.backward()
+
+        print(loss.data[0])
         
-#         optimizer.step()
+        optimizer.step()
