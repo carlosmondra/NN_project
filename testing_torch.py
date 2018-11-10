@@ -44,14 +44,36 @@ import torch.nn.functional as F
 class Model(torch.nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        # This are dummy declarations
-        self.conv1 = nn.Conv2d(1, 20, 5)
-        self.conv2 = nn.Conv2d(20, 20, 5)
+        self.conv1 = torch.nn.Conv2d(3, 8, 5, padding=2)
+        self.conv2 = torch.nn.Conv2d(8, 16, 5, padding=2)
+        self.conv3 = torch.nn.Conv2d(16, 32, 3, padding=1)
+
+        self.conv4 = torch.nn.Conv2d(32, 32, 3, padding=1)
+
+        self.conv5 = torch.nn.Conv2d(32, 16, 3, padding=1)
+        self.conv6 = torch.nn.Conv2d(16, 8, 5, padding=2)
+        self.conv7 = torch.nn.Conv2d(8, 2, 5, padding=2)
+
+        self.upsample = torch.nn.Upsample(scale_factor=2)
+        self.max_pool = torch.nn.MaxPool2d(2, stride=2)
+        self.relu = torch.nn.ReLU()
 
     def forward(self, x):
         # This are dummy declarations
-        x = F.relu(self.conv1(x))
-       return F.relu(self.conv2(x))
+        h1 = self.max_pool(self.relu(self.conv1(x)))
+        # h2 = self.max_pool(self.relu(self.conv2(h1)))
+        # h3 = self.max_pool(self.relu(self.conv2(h2)))
+        
+        # h4 = self.relu(self.conv4(h3))
+        # h5 = self.upsample(self.relu(self.conv4(h4)))
+
+        # h6 = self.upsample(self.relu(self.conv5(h5)))
+        # h7 = self.upsample(self.relu(self.conv6(h6)))
+        h7 = self.upsample(h1)
+        h8 = self.relu(self.conv6(h7))
+
+        # x = F.relu(self.conv1(x))
+       return h8
 
 # Testing Softmax
 # dtype = torch.cuda.FloatTensor
@@ -64,23 +86,23 @@ class Model(torch.nn.Module):
 
 # dtype = torch.cuda.FloatTensor
 
-dataset = TensorDataset('dataset', transform=transform)
-loader = torch.utils.data.DataLoader(dataset, batch_size=20)
-model = Model()
+# dataset = TensorDataset('dataset', transform=transform)
+# loader = torch.utils.data.DataLoader(dataset, batch_size=20)
+# model = Model()
 
-# Check CrossEntropy options
-loss = torch.nn.CrossEntropyLoss()
-learning_rate = 1e-4
-# I haven't check the optimizer
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+# # Check CrossEntropy options
+# loss = torch.nn.CrossEntropyLoss()
+# learning_rate = 1e-4
+# # I haven't check the optimizer
+# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-for epoch in range(10)
-    for x_batch, y_batch in loader:
-        x_var, y_var = Variable(x_batch), Variable(y_batch)
-        y_pred = model(x_var)
-        loss = loss_fn(y_pred, y_var)
+# for epoch in range(10)
+#     for x_batch, y_batch in loader:
+#         x_var, y_var = Variable(x_batch), Variable(y_batch)
+#         y_pred = model(x_var)
+#         loss = loss_fn(y_pred, y_var)
 
-        optimizer.zero_grad()
-        loss.backward()
+#         optimizer.zero_grad()
+#         loss.backward()
         
-        optimizer.step()
+#         optimizer.step()
