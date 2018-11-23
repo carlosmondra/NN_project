@@ -56,7 +56,6 @@ class TensorDataset(torch.utils.data.Dataset):
 # for sample in loader:
 #     print(sample['labels'].size())
 
-import torch.nn.functional as F
 class Model(torch.nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -77,16 +76,16 @@ class Model(torch.nn.Module):
     def forward(self, x):
         # This are dummy declarations
         h1 = self.max_pool(self.relu(self.conv1(x)))
-        # h2 = self.max_pool(self.relu(self.conv2(h1)))
-        # h3 = self.max_pool(self.relu(self.conv3(h2)))
+        h2 = self.max_pool(self.relu(self.conv2(h1)))
+        h3 = self.max_pool(self.relu(self.conv3(h2)))
 
-        # h4 = self.relu(self.conv4(h3))
-        # h5 = self.upsample(self.relu(self.conv4(h4)))
+        h4 = self.relu(self.conv4(h3))
+        h5 = self.upsample(self.relu(self.conv4(h4)))
 
-        # h6 = self.upsample(self.relu(self.conv5(h5)))
-        # h7 = self.upsample(self.relu(self.conv6(h6)))
-        h7 = self.upsample(h1)
-        h8 = self.relu(self.conv7(h7))
+        h6 = self.upsample(self.relu(self.conv5(h5)))
+        h7 = self.upsample(self.relu(self.conv6(h6)))
+        # h7 = self.upsample(h1)
+        h8 = self.conv7(h7)
 
         # x = F.relu(self.conv1(x))
         return h8
@@ -108,10 +107,8 @@ dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform
 loader = torch.utils.data.DataLoader(dataset, batch_size=3)
 model = Model().cuda()
 
-# Check CrossEntropy options
 loss_fn = torch.nn.CrossEntropyLoss()
 learning_rate = 1e-4
-# I haven't check the optimizer
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 for epoch in range(10):
