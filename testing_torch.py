@@ -103,7 +103,7 @@ class Model(torch.nn.Module):
 # dtype = torch.cuda.FloatTensor
 
 dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
-loader = torch.utils.data.DataLoader(dataset, batch_size=5)
+loader = torch.utils.data.DataLoader(dataset, batch_size=2)
 model = Model().cuda()
 
 loss_fn = torch.nn.CrossEntropyLoss()
@@ -131,7 +131,6 @@ def show_img(pt_tensor):
     img_r = y_pred_np[0][1]
     img_b = y_pred_np[0][0]
     img_g = (img_r > img_b) * 255
-    print(img_g)
     img = np.array([img_g, np.zeros((640,640)), np.zeros((640,640))]).astype(np.uint8)
 
     img = img.transpose(1,2,0)
@@ -139,4 +138,12 @@ def show_img(pt_tensor):
     img.save('preview.png')
     img.show()
 
-show_img(y_pred)
+
+validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=transform)
+loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1)
+
+for x_batch, _ in loader:
+    x_var = Variable(x_batch)
+    y_val_pred = model(x_var)
+
+show_img(y_val_pred)
