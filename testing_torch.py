@@ -138,3 +138,5 @@ def show_img(pt_tensor):
     img = Image.fromarray(img, 'RGB')
     img.save('preview.png')
     img.show()
+
+show_img(y_pred)
