@@ -34,13 +34,12 @@ class TensorDataset(torch.utils.data.Dataset):
         
         #resides in 'NN_project/dataset/masks'
         mask_path = os.path.join(self.masks_dir, img_name)
-        mask = PIL.Image.open(img_path).convert('RGB')
+        mask = PIL.Image.open(mask_path).convert('RGB')
         mask = np.array(mask)
         mask = mask.transpose((2,0,1)) #transpose ot get color channel as first dimension
         mask_road = mask[0]
         
         label_road = (mask_road[:][:]==255)*1
-        label_empty = (mask_road[:][:]!=255)*1
         
         labels = torch.from_numpy(label_road).type(torch.cuda.LongTensor)
         
@@ -104,14 +103,14 @@ class Model(torch.nn.Module):
 # dtype = torch.cuda.FloatTensor
 
 dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
-loader = torch.utils.data.DataLoader(dataset, batch_size=3)
+loader = torch.utils.data.DataLoader(dataset, batch_size=5)
 model = Model().cuda()
 
 loss_fn = torch.nn.CrossEntropyLoss()
-learning_rate = 1e-4
+learning_rate = 1e-3
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-for epoch in range(10):
+for epoch in range(300):
     for x_batch, y_batch in loader:
         x_var = Variable(x_batch)
         y_var = Variable(y_batch)
@@ -133,38 +132,9 @@ def show_img(pt_tensor):
     img_b = y_pred_np[0][1]
     img_g = (img_r < img_b) * 255
     print(img_g)
-    img = np.array([img_g, np.zeros((640,640)), np.zeros((640,640))])
+    img = np.array([img_g, np.zeros((640,640)), np.zeros((640,640))]).astype(np.uint8)
 
     img = img.transpose(1,2,0)
     img = Image.fromarray(img, 'RGB')
     img.save('preview.png')
     img.show()
-
-show_img(y_pred)
-print(y_var)
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
