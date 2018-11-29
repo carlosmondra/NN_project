@@ -130,6 +130,15 @@ def show_img(pt_tensor):
     img.save('preview.png')
     img.show()
 
+# def show_img_2(pt_tensor):
+#     img_r = pt_tensor[0][1]
+#     img_b = pt_tensor[0][0]
+#     img_g = img_r - img_b
+#     img_g[img_r > img_b] = 1
+
+    
+#     print(torch.sum(img_g))
+
 
 validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=transform)
 loader = torch.utils.data.DataLoader(validation_dataset)
