@@ -128,9 +128,9 @@ for epoch in range(300):
 def show_img(pt_tensor):
     y_pred_np = pt_tensor.cpu().detach().numpy()
     #get the first image and the red color channel
-    img_r = y_pred_np[0][0]
-    img_b = y_pred_np[0][1]
-    img_g = (img_r < img_b) * 255
+    img_r = y_pred_np[0][1]
+    img_b = y_pred_np[0][0]
+    img_g = (img_r > img_b) * 255
     print(img_g)
     img = np.array([img_g, np.zeros((640,640)), np.zeros((640,640))]).astype(np.uint8)
 
