@@ -35,16 +35,8 @@ class TensorDataset(torch.utils.data.Dataset):
         #resides in 'NN_project/dataset/masks'
         mask_path = os.path.join(self.masks_dir, img_name)
         mask = PIL.Image.open(mask_path).convert('RGB')
-        mask = np.array(mask)
-        mask = mask.transpose((2,0,1)) #transpose ot get color channel as first dimension
-        mask_road = mask[0]
-        
-        label_road = (mask_road[:][:]==255)*1
-        
-        labels = torch.from_numpy(label_road).type(torch.cuda.LongTensor)
-        
-        #labels = torch.randint(2, (2,640,640)).type(torch.cuda.LongTensor)
-        # sample = {'image': image, 'labels': labels}
+        mask = transforms.ToTensor()(mask).type(torch.cuda.LongTensor)
+        labels = mask[0]
         sample = (image, labels)
 
         return sample
@@ -140,10 +132,10 @@ def show_img(pt_tensor):
 
 
 validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=transform)
-loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1)
+loader = torch.utils.data.DataLoader(validation_dataset)
 
 for x_batch, _ in loader:
     x_var = Variable(x_batch)
     y_val_pred = model(x_var)
 
-show_img(y_val_pred)
+show_img(y_pred)
