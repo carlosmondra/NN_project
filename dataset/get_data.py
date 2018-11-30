@@ -39,7 +39,8 @@ start_lat   = -73.998384
 
 save_image(1,2)
 
-for i in range(add_plus_minus.shape[0]):
+# for i in range(add_plus_minus.shape[0]):
+for i in range(1):
   longitude = start_long + add_plus_minus[i][0]
   latitude  = start_lat   + add_plus_minus[i][1]
   longitude = np.round_(longitude, decimals=6)
@@ -57,5 +58,5 @@ for i in range(add_plus_minus.shape[0]):
     continue
   else:
     break
-  
+
 print('End of script')
