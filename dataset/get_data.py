@@ -9,6 +9,7 @@ Created on Tue Nov  6 17:11:52 2018
 import urllib.request as urllib2
 import numpy as np
 
+name = "00000099.png"
 
 
 def save_image(longitude, latitude, name):
@@ -29,8 +30,6 @@ def save_image(longitude, latitude, name):
   
   urllib2.urlretrieve(URL, name)
   
-  
-
 
 add_plus_minus = np.random.uniform(low=0.0, high=0.013818, size=(100,2))
 
@@ -54,14 +53,16 @@ for i in range(25):
   save_image(longitude,latitude, name)
   
   
-  from IPython.display import Image, display
-  display(Image(filename=name))
-  
-#  print('Continue?[y/n]')
-#  cmd = input()
-#  if cmd == 'y':
-#    continue
-#  else:
-#    break
+#   from IPython.display import Image, display
+#   display(Image(filename=name))
 
-print('End of script')
+
+#   print('Continue?[y/n]')
+#   cmd = input()
+#   if cmd == 'y':
+#     continue
+#   else:
+#     break
+>>>>>>> cf86e6e13b089870d5f615c14c6ed903bdf4d459
+
+# print('End of script')
