@@ -9,9 +9,9 @@ Created on Tue Nov  6 17:11:52 2018
 import urllib.request as urllib2
 import numpy as np
 
-name = "00000050.png"
 
-def save_image(longitude, latitude):
+
+def save_image(longitude, latitude, name):
   
   longitude = str(longitude)
   latitude = str(latitude)
@@ -37,26 +37,31 @@ add_plus_minus = np.random.uniform(low=0.0, high=0.013818, size=(100,2))
 start_long = 40.718317
 start_lat   = -73.998384
 
-save_image(1,2)
+#save_image(1,2)
 
 # for i in range(add_plus_minus.shape[0]):
-for i in range(1):
+num = 52
+for i in range(25):
   longitude = start_long + add_plus_minus[i][0]
   latitude  = start_lat   + add_plus_minus[i][1]
   longitude = np.round_(longitude, decimals=6)
   latitude  = np.round_(latitude, decimals=6)
   
+  name = '000000' + str(num) + '.png'
+  num = num + 2
+  
   print('Saving image for longitude=%f and latitude=%f' % (longitude, latitude))
-  save_image(longitude,latitude)
+  save_image(longitude,latitude, name)
+  
   
   from IPython.display import Image, display
   display(Image(filename=name))
   
-  print('Continue?[y/n]')
-  cmd = input()
-  if cmd == 'y':
-    continue
-  else:
-    break
+#  print('Continue?[y/n]')
+#  cmd = input()
+#  if cmd == 'y':
+#    continue
+#  else:
+#    break
 
 print('End of script')

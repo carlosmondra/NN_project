@@ -94,12 +94,14 @@ class Model(torch.nn.Module):
 
 # dtype = torch.cuda.FloatTensor
 
-dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
-loader = torch.utils.data.DataLoader(dataset, batch_size=2)
 model = Model().cuda()
 
+dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
+loader = torch.utils.data.DataLoader(dataset, batch_size=20)
+
+
 loss_fn = torch.nn.CrossEntropyLoss()
-learning_rate = 1e-3
+learning_rate = 5e-3
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 for epoch in range(300):
@@ -147,4 +149,4 @@ for x_batch, _ in loader:
     x_var = Variable(x_batch)
     y_val_pred = model(x_var)
 
-show_img(y_pred)
+show_img(y_val_pred)
