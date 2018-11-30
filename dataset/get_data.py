@@ -26,7 +26,7 @@ def save_image(longitude, latitude):
   
   print(URL)
   
-  urllib2.urlretrieve(URL, "00000031.png")
+  urllib2.urlretrieve(URL, "00000049.png")
   
   
 
