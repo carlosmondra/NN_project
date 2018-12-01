@@ -97,14 +97,14 @@ class Model(torch.nn.Module):
 model = Model().cuda()
 
 dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
-loader = torch.utils.data.DataLoader(dataset, batch_size=20)
+loader = torch.utils.data.DataLoader(dataset, batch_size=15)
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
 learning_rate = 5e-3
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-for epoch in range(300):
+for epoch in range(200):
     for x_batch, y_batch in loader:
         x_var = Variable(x_batch)
         y_var = Variable(y_batch)
@@ -115,9 +115,10 @@ for epoch in range(300):
         optimizer.zero_grad()
         loss.backward()
 
-        print(loss.data[0])
+        # print(loss.data[0])
         
         optimizer.step()
+    print("Epoch:",epoch,"Loss:",loss.data[0])
 
 def show_img(pt_tensor):
     y_pred_np = pt_tensor.cpu().detach().numpy()
