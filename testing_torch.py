@@ -2,10 +2,15 @@ import torch
 from torch.autograd import Variable
 import torchvision
 import torchvision.transforms as transforms
+import torch.nn as nn
 import os
 import PIL.Image
 from PIL import Image
 import numpy as np
+from torchvision.models.vgg import VGG
+from torchvision import models
+
+
 
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -50,7 +55,7 @@ class TensorDataset(torch.utils.data.Dataset):
 class Model(torch.nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.conv1 = torch.nn.Conv2d(3, 8, 5, padding=2)
+        self.conv1 = torch.nn.Conv2d(2, 8, 5, padding=2)
         self.conv2 = torch.nn.Conv2d(8, 16, 5, padding=2)
         self.conv3 = torch.nn.Conv2d(16, 32, 3, padding=1)
 
@@ -65,7 +70,8 @@ class Model(torch.nn.Module):
         self.relu = torch.nn.ReLU()
 
     def forward(self, x):
-        # This are dummy declarations
+        # These are dummy declarations
+        x = torch.reshape(x, (10,2,640,640))
         h1 = self.max_pool(self.relu(self.conv1(x)))
         h2 = self.max_pool(self.relu(self.conv2(h1)))
         h3 = self.max_pool(self.relu(self.conv3(h2)))
@@ -94,10 +100,29 @@ class Model(torch.nn.Module):
 
 # dtype = torch.cuda.FloatTensor
 
-model = Model().cuda()
+#model = Model().cuda()
+
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
+        
+    def forward(self, x):
+        return x
+
+model = models.resnet18(pretrained=True)
+for param in model.parameters():
+    param.requires_grad = False
+#num_ftrs = model.fc.in_features
+model.layer3 = Model()#Identity()#
+model.layer3.reuires_grad = True
+model.layer4 = Identity()
+model.avgpool = Identity()
+model.fc = Identity()
+model = model.cuda()
+print('LOADED MODEL')
 
 dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
-loader = torch.utils.data.DataLoader(dataset, batch_size=15)
+loader = torch.utils.data.DataLoader(dataset, batch_size=10)
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
@@ -105,33 +130,34 @@ learning_rate = 5e-3
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 for epoch in range(300):
-    for x_batch, y_batch in loader:
-        x_var = Variable(x_batch)
-        y_var = Variable(y_batch)
-        y_pred = model(x_var)
+  for x_batch, y_batch in loader:
+    x_var = Variable(x_batch)
+    y_var = Variable(y_batch)
+    y_pred = model(x_var)
+    y_pred = torch.reshape(y_pred, (10, 2, 640, 640))
+    #note: y_pred is of size (batch_size, 640, 640)
+    #      y_var if of size (batch_size, num_classes, 640, 640)
+    loss = loss_fn(y_pred, y_var)
+    #makes the gradient zero or they will accumulate
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    
+  print("Epoch:",epoch,"Loss:",loss.data[0])  
 
-        loss = loss_fn(y_pred, y_var)
-
-        optimizer.zero_grad()
-        loss.backward()
-
-        # print(loss.data[0])
-        
-        optimizer.step()
-    print("Epoch:",epoch,"Loss:",loss.data[0])
 
 def show_img(pt_tensor):
-    y_pred_np = pt_tensor.cpu().detach().numpy()
-    #get the first image and the red color channel
-    img_r = y_pred_np[0][1]
-    img_b = y_pred_np[0][0]
-    img_g = (img_r > img_b) * 255
-    img = np.array([img_g, np.zeros((640,640)), np.zeros((640,640))]).astype(np.uint8)
-
-    img = img.transpose(1,2,0)
-    img = Image.fromarray(img, 'RGB')
-    img.save('preview.png')
-    img.show()
+  y_pred_np = pt_tensor.cpu().detach().numpy()
+  #get the first image and the red color channel
+  img_r = y_pred_np[0][1]
+  img_b = y_pred_np[0][0]
+  img_g = (img_r > img_b) * 255
+  img = np.array([img_g, np.zeros((640,640)), np.zeros((640,640))]).astype(np.uint8)
+  
+  img = img.transpose(1,2,0)
+  img = Image.fromarray(img, 'RGB')
+  img.save('preview.png')
+  img.show()
 
 # def show_img_2(pt_tensor):
 #     img_r = pt_tensor[0][1]
@@ -147,7 +173,7 @@ validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validatio
 loader = torch.utils.data.DataLoader(validation_dataset)
 
 for x_batch, _ in loader:
-    x_var = Variable(x_batch)
-    y_val_pred = model(x_var)
+  x_var = Variable(x_batch)
+  y_val_pred = model(x_var)
 
 show_img(y_val_pred)
