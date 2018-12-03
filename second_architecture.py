@@ -58,6 +58,7 @@ class Model(torch.nn.Module):
         # self.conv_dilation3 = torch.nn.Conv2d(32, 32, 3, padding=1, dilation=1)
 
         self.conv4 = torch.nn.Conv2d(32, 32, 3, padding=1)
+        self.conv4_2 = torch.nn.Conv2d(32, 32, 3, padding=1)
         self.conv_tran4 = torch.nn.ConvTranspose2d(32, 32, 2, stride=2, padding=0)
 
         self.conv5 = torch.nn.Conv2d(32, 16, 3, padding=1)
@@ -72,12 +73,18 @@ class Model(torch.nn.Module):
 
     def forward(self, x):
         # This are dummy declarations
-        h1 = self.max_pool(self.relu(self.conv1(x)))
-        h2 = self.max_pool(self.relu(self.conv2(h1)))
-        h3 = self.max_pool(self.relu(self.conv3(h2)))
+        # pre_h1 = self.relu(self.conv_dilation1(self.relu(self.conv1(x))))
+        pre_h1 = self.relu(self.conv1(x))
+        h1 = self.max_pool(pre_h1)
+        # pre_h2 = self.relu(self.conv_dilation2(self.relu(self.conv2(h1))))
+        pre_h2 = self.relu(self.conv2(h1))
+        h2 = self.max_pool(pre_h2)
+        # pre_h3 = self.relu(self.conv_dilation3(self.relu(self.conv3(h2))))
+        pre_h3 = self.relu(self.conv3(h2))
+        h3 = self.max_pool(pre_h3)
 
         h4 = self.relu(self.conv4(h3))
-        h5 = self.relu(self.conv_tran4(self.relu(self.conv4(h4))))
+        h5 = self.relu(self.conv_tran4(self.relu(self.conv4_2(h4))))
 
         h6 = self.relu(self.conv_tran5(self.relu(self.conv5(h5))))
         h7 = self.relu(self.conv_tran6(self.relu(self.conv6(h6))))
