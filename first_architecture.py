@@ -104,7 +104,7 @@ loss_fn = torch.nn.CrossEntropyLoss()
 learning_rate = 5e-3
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-for epoch in range(200):
+for epoch in range(300):
     for x_batch, y_batch in loader:
         x_var = Variable(x_batch)
         y_var = Variable(y_batch)
@@ -119,6 +119,9 @@ for epoch in range(200):
         
         optimizer.step()
     print("Epoch:",epoch,"Loss:",loss.data[0])
+import pickle
+with open('first_model.pickle', 'wb') as handle:
+    pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 def show_img(pt_tensor):
     y_pred_np = pt_tensor.cpu().detach().numpy()
