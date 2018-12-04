@@ -101,11 +101,11 @@ optimizer = optim.RMSprop(fcn_model.parameters(), lr=lr, momentum=momentum, weig
 scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)  # decay LR by a factor of 0.5 every 30 epochs
 
 # create dir for score
-score_dir = os.path.join("scores", configs)
-if not os.path.exists(score_dir):
-    os.makedirs(score_dir)
-IU_scores    = np.zeros((epochs, n_class))
-pixel_scores = np.zeros(epochs)
+# score_dir = os.path.join("scores", configs)
+# if not os.path.exists(score_dir):
+#     os.makedirs(score_dir)
+# IU_scores    = np.zeros((epochs, n_class))
+# pixel_scores = np.zeros(epochs)
 
 dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
 loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
