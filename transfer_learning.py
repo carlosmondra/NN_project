@@ -205,9 +205,25 @@ def show_img(pt_tensor):
     img.save('preview.png')
     img.show()
 
+def show_masked_img(pt_tensor, raw_img):
+    y_pred_np = pt_tensor.cpu().detach().numpy()
+    img_r = y_pred_np[0][1]
+    img_b = y_pred_np[0][0]
+    pred = img_r > img_b
+    img_array = np.array(raw_img).astype(np.uint8)
+    red_array = np.zeros_like(img_array[:,:,0]) + 255
+    mask = red_array - img_array[:,:,0]
+    mask[mask > 100] = 100
+    mask *= pred.astype(np.uint8)
+    img_array[:,:,0] += mask
+    image = Image.fromarray(img_array, 'RGB')
+    image.show()
+
 if __name__ == "__main__":
     # val(0)  # show the accuracy before training
-    train()
+    # train()
+
+    fcn_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
 
     validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=transform)
     loader = torch.utils.data.DataLoader(validation_dataset)
@@ -222,4 +238,6 @@ if __name__ == "__main__":
         loss_val = criterion(y_val_pred, labels)
 
     print("Val loss:", loss_val.item())
-    show_img(y_val_pred)
+    # show_img(y_val_pred)
+    raw_img = PIL.Image.open("dataset/validation_imgs/00000001.png").convert('RGB')
+    show_masked_img(y_val_pred, raw_img)
