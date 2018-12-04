@@ -20,7 +20,7 @@ import os
 n_class    = 2
 
 batch_size = 3
-epochs     = 150
+epochs     = 90
 lr         = 1e-4
 momentum   = 0
 w_decay    = 1e-5
@@ -51,7 +51,7 @@ use_gpu = torch.cuda.is_available()
 #     val_data = CityscapesDataset(csv_file=val_file, phase='val', flip_rate=0)
 # val_loader = DataLoader(val_data, batch_size=1, num_workers=8)
 
-vgg_model = VGGNet(requires_grad=True, remove_fc=True, model='vgg11')
+vgg_model = VGGNet(requires_grad=True, remove_fc=True, model='vgg16')
 fcn_model = FCNs(pretrained_net=vgg_model, n_class=n_class)
 
 if use_gpu:
