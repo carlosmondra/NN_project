@@ -19,8 +19,8 @@ import os
 
 n_class    = 2
 
-batch_size = 6
-epochs     = 50
+batch_size = 3
+epochs     = 150
 lr         = 1e-4
 momentum   = 0
 w_decay    = 1e-5
@@ -31,10 +31,10 @@ print("Configs:", configs)
 
 
 # create dir for model
-# model_dir = "models"
-# if not os.path.exists(model_dir):
-#     os.makedirs(model_dir)
-# model_path = os.path.join(model_dir, configs)
+model_dir = "models"
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir)
+model_path = os.path.join(model_dir, configs)
 
 use_gpu = torch.cuda.is_available()
 # num_gpu = list(range(torch.cuda.device_count()))
@@ -108,7 +108,7 @@ IU_scores    = np.zeros((epochs, n_class))
 pixel_scores = np.zeros(epochs)
 
 dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
-loader = torch.utils.data.DataLoader(dataset, batch_size=2)
+loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
 
 def train():
     for epoch in range(epochs):
@@ -130,10 +130,10 @@ def train():
             optimizer.step()
 
             if iter % 10 == 0:
-                print("epoch{}, iter{}, loss: {}".format(epoch, iter, loss.data[0]))
+                print("epoch{}, iter{}, loss: {}".format(epoch, iter, loss.item()))
         
         print("Finish epoch {}, time elapsed {}".format(epoch, time.time() - ts))
-        # torch.save(fcn_model, model_path)
+        torch.save(fcn_model, model_path)
 
         # val(epoch)
 
@@ -192,7 +192,34 @@ def train():
 #     total   = (target == target).sum()
 #     return correct / total
 
+def show_img(pt_tensor):
+    y_pred_np = pt_tensor.cpu().detach().numpy()
+    #get the first image and the red color channel
+    img_r = y_pred_np[0][1]
+    img_b = y_pred_np[0][0]
+    img_g = (img_r > img_b) * 255
+    img = np.array([img_g, np.zeros((640,640)), np.zeros((640,640))]).astype(np.uint8)
+
+    img = img.transpose(1,2,0)
+    img = Image.fromarray(img, 'RGB')
+    img.save('preview.png')
+    img.show()
 
 if __name__ == "__main__":
     # val(0)  # show the accuracy before training
     train()
+
+    validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=transform)
+    loader = torch.utils.data.DataLoader(validation_dataset)
+
+    for batch in loader:
+        if use_gpu:
+            inputs = Variable(batch['X'].cuda())
+            labels = Variable(batch['Y'].cuda())
+        else:
+            inputs, labels = Variable(batch['X']), Variable(batch['Y'])
+        y_val_pred = fcn_model(inputs)
+        loss_val = criterion(y_val_pred, labels)
+
+    print("Val loss:", loss_val.item())
+    show_img(y_val_pred)
