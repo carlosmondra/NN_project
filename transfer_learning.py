@@ -212,11 +212,17 @@ def show_masked_img(pt_tensor, raw_img):
     pred = img_r > img_b
     img_array = np.array(raw_img).astype(np.uint8)
     red_array = np.zeros_like(img_array[:,:,0]) + 255
+    img_array[:,:,0] //= 2
+
     mask = red_array - img_array[:,:,0]
-    mask[mask > 100] = 100
+
+    mask[mask > 255] = 255
     mask *= pred.astype(np.uint8)
     img_array[:,:,0] += mask
+    img_array[:,:,1] //= 2
+    img_array[:,:,2] //= 2
     image = Image.fromarray(img_array, 'RGB')
+    image.save('preview2.png')
     image.show()
 
 if __name__ == "__main__":
