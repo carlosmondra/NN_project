@@ -9,7 +9,7 @@ Created on Tue Nov  6 17:11:52 2018
 import urllib.request as urllib2
 import numpy as np
 
-name = "00000099.png"
+name = "00000010.png"
 
 
 def save_image(longitude, latitude, name):
@@ -40,29 +40,28 @@ start_lat   = -73.998384
 
 # for i in range(add_plus_minus.shape[0]):
 num = 52
-for i in range(25):
+for i in range(1):
   longitude = start_long + add_plus_minus[i][0]
   latitude  = start_lat   + add_plus_minus[i][1]
   longitude = np.round_(longitude, decimals=6)
   latitude  = np.round_(latitude, decimals=6)
   
-  name = '000000' + str(num) + '.png'
+  #name = '000000' + str(num) + '.png'
   num = num + 2
   
   print('Saving image for longitude=%f and latitude=%f' % (longitude, latitude))
   save_image(longitude,latitude, name)
+
+
+  from IPython.display import Image, display
+  display(Image(filename=name))
   
   
-#   from IPython.display import Image, display
-#   display(Image(filename=name))
+#  print('Continue?[y/n]')
+#  cmd = input()
+#  if cmd == 'y':
+#    continue
+#  else:
+#    break
 
-
-#   print('Continue?[y/n]')
-#   cmd = input()
-#   if cmd == 'y':
-#     continue
-#   else:
-#     break
->>>>>>> cf86e6e13b089870d5f615c14c6ed903bdf4d459
-
-# print('End of script')
+print('End of script')
