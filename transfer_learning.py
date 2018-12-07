@@ -37,19 +37,6 @@ if not os.path.exists(model_dir):
 model_path = os.path.join(model_dir, configs)
 
 use_gpu = torch.cuda.is_available()
-# num_gpu = list(range(torch.cuda.device_count()))
-
-# if sys.argv[1] == 'CamVid':
-#     train_data = CamVidDataset(csv_file=train_file, phase='train')
-# else:
-#     train_data = CityscapesDataset(csv_file=train_file, phase='train')
-# train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=8)
-
-# if sys.argv[1] == 'CamVid':
-#     val_data = CamVidDataset(csv_file=val_file, phase='val', flip_rate=0)
-# else:
-#     val_data = CityscapesDataset(csv_file=val_file, phase='val', flip_rate=0)
-# val_loader = DataLoader(val_data, batch_size=1, num_workers=8)
 
 vgg_model = VGGNet(requires_grad=True, remove_fc=True, model='vgg16')
 fcn_model = FCNs(pretrained_net=vgg_model, n_class=n_class)
@@ -60,11 +47,6 @@ if use_gpu:
     fcn_model = fcn_model.cuda()
     # fcn_model = nn.DataParallel(fcn_model, device_ids=num_gpu)
     print("Finish cuda loading, time elapsed {}".format(time.time() - ts))
-
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-])
 
 class TensorDataset(torch.utils.data.Dataset):
     def __init__(self,raw_imgs_dir,masks_dir,transform=transforms.ToTensor()):
@@ -107,7 +89,12 @@ scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)  # 
 # IU_scores    = np.zeros((epochs, n_class))
 # pixel_scores = np.zeros(epochs)
 
-dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=transform)
+training_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    transforms.ColorJitter(brightness=0, contrast=0, saturation=0, hue=0)
+])
+dataset = TensorDataset('dataset/raw_imgs', 'dataset/masks', transform=training_transform)
 loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
 
 def train():
@@ -170,12 +157,15 @@ def show_masked_img(pt_tensor, raw_img):
     image.show()
 
 if __name__ == "__main__":
-    # val(0)  # show the accuracy before training
     # train()
 
     fcn_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
 
-    validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=transform)
+    validation_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=validation_transform)
     loader = torch.utils.data.DataLoader(validation_dataset)
 
     for idx, batch in enumerate(loader):
