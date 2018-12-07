@@ -207,8 +207,8 @@ def show_img(pt_tensor):
 
 def show_masked_img(pt_tensor, raw_img):
     y_pred_np = pt_tensor.cpu().detach().numpy()
-    img_r = y_pred_np[0][1]
-    img_b = y_pred_np[0][0]
+    img_r = y_pred_np[1]
+    img_b = y_pred_np[0]
     pred = img_r > img_b
     img_array = np.array(raw_img).astype(np.uint8)
     red_array = np.zeros_like(img_array[:,:,0]) + 255
@@ -242,8 +242,10 @@ if __name__ == "__main__":
             inputs, labels = Variable(batch['X']), Variable(batch['Y'])
         y_val_pred = fcn_model(inputs)
         loss_val = criterion(y_val_pred, labels)
+        print("Val loss:", loss_val.item())
 
-    print("Val loss:", loss_val.item())
-    # show_img(y_val_pred)
-    raw_img = PIL.Image.open("dataset/validation_imgs/00000001.png").convert('RGB')
-    show_masked_img(y_val_pred, raw_img)
+        for idx, pred in enumerate(y_val_pred):
+            str_idx = str(idx + 1)
+            img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
+            raw_img = PIL.Image.open("dataset/validation_imgs/" + img_name).convert('RGB')
+            show_masked_img(pred, raw_img)
