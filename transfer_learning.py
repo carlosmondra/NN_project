@@ -234,7 +234,7 @@ if __name__ == "__main__":
     validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=transform)
     loader = torch.utils.data.DataLoader(validation_dataset)
 
-    for batch in loader:
+    for idx, batch in enumerate(loader):
         if use_gpu:
             inputs = Variable(batch['X'].cuda())
             labels = Variable(batch['Y'].cuda())
@@ -244,8 +244,8 @@ if __name__ == "__main__":
         loss_val = criterion(y_val_pred, labels)
         print("Val loss:", loss_val.item())
 
-        for idx, pred in enumerate(y_val_pred):
-            str_idx = str(idx + 1)
-            img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
-            raw_img = PIL.Image.open("dataset/validation_imgs/" + img_name).convert('RGB')
-            show_masked_img(pred, raw_img)
+        # for idx, pred in enumerate(y_val_pred):
+        str_idx = str(idx + 1)
+        img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
+        raw_img = PIL.Image.open("dataset/validation_imgs/" + img_name).convert('RGB')
+        show_masked_img(y_val_pred[0], raw_img)
