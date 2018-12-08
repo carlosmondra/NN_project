@@ -20,7 +20,7 @@ import os
 n_class    = 2
 
 batch_size = 3
-epochs     = 90
+epochs     = 100
 lr         = 1e-4
 momentum   = 0
 w_decay    = 1e-5
@@ -157,9 +157,9 @@ def show_masked_img(pt_tensor, raw_img):
     image.show()
 
 if __name__ == "__main__":
-    # train()
+    train()
 
-    fcn_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
+    # fcn_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
 
     validation_transform = transforms.Compose([
         transforms.ToTensor(),
