@@ -19,7 +19,7 @@ import os
 
 n_class    = 2
 
-batch_size = 3
+batch_size = 2
 epochs     = 100
 lr         = 1e-4
 momentum   = 0
