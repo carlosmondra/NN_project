@@ -91,6 +91,43 @@ def show_masked_img(roads_tensor, cars_tensor, raw_img):
     # image.save('preview2.png')
     image.show()
 
+def get_traffic_level(roads_tensor, cars_tensor):
+    # Convert to numpy
+    roads_pred = roads_tensor.cpu().detach().numpy()
+    cars_pred = cars_tensor.cpu().detach().numpy()
+    # Extract roads
+    roads_img_r = roads_pred[1]
+    roads_img_b = roads_pred[0]
+    # Extract cars
+    cars_img_r = cars_pred[1]
+    cars_img_b = cars_pred[0]
+
+    # Setting true valeus where the pixel is more likely to be a road
+    roads_pred = roads_img_r > roads_img_b
+    # Setting true valeus where the pixel is more likely to be a car
+    cars_pred = cars_img_r > cars_img_b
+    # Only care about the cars predicted on roads
+    cars_pred *= roads_pred
+
+    # Check if enough roads
+    road_pixels = np.sum(roads_pred)
+    total_pixels = roads_pred.shape[0] * roads_pred.shape[1]
+
+    if road_pixels / total_pixels < 0.1:
+        return "Not enough roads"
+    
+    #Check number of car pixels
+    car_pixels = np.sum(cars_pred)
+    traffic = car_pixels / road_pixels
+    # print("Traffic", traffic)
+    if traffic < 0.2:
+        return "No traffic"
+    if traffic < 0.5:
+        return "Moderate traffic"
+    if traffic < 0.8:
+        return "Traffic"
+    return "Heavy traffic"
+
 if __name__ == "__main__":
     import pickle
     directory = 'dataset/car_preds'
@@ -106,3 +143,4 @@ if __name__ == "__main__":
             roads_pred, raw_img = pickle.load(handle)
 
         show_masked_img(roads_pred, cars_pred, raw_img)
+        # print(get_traffic_level(roads_pred, cars_pred))
