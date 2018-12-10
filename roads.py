@@ -27,8 +27,6 @@ w_decay    = 1e-5
 step_size  = 50
 gamma      = 0.5
 configs    = "roads-CrossEnt_batch{}_epoch{}_RMSprop_scheduler-step{}-gamma{}_lr{}_momentum{}_w_decay{}".format(batch_size, epochs, step_size, gamma, lr, momentum, w_decay)
-print("Configs:", configs)
-
 
 # create dir for model
 model_dir = "models"
@@ -153,13 +151,13 @@ def show_masked_img(pt_tensor, raw_img):
     img_array[:,:,1] //= 2
     img_array[:,:,2] //= 2
     image = Image.fromarray(img_array, 'RGB')
-    image.save('preview2.png')
-    image.show()
+    # image.save('preview2.png')
+    # image.show()
 
 if __name__ == "__main__":
-    train()
+    # train()
 
-    # fcn_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
+    fcn_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
 
     validation_transform = transforms.Compose([
         transforms.ToTensor(),
@@ -168,6 +166,8 @@ if __name__ == "__main__":
     validation_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', transform=validation_transform)
     loader = torch.utils.data.DataLoader(validation_dataset)
 
+    import pickle
+
     for idx, batch in enumerate(loader):
         if use_gpu:
             inputs = Variable(batch['X'].cuda())
@@ -175,11 +175,10 @@ if __name__ == "__main__":
         else:
             inputs, labels = Variable(batch['X']), Variable(batch['Y'])
         y_val_pred = fcn_model(inputs)
-        loss_val = criterion(y_val_pred, labels)
-        print("Val loss:", loss_val.item())
 
         # for idx, pred in enumerate(y_val_pred):
         str_idx = str(idx + 1)
         img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
         raw_img = PIL.Image.open("dataset/validation_imgs/" + img_name).convert('RGB')
-        show_masked_img(y_val_pred[0], raw_img)
+        with open('dataset/road_preds/prediction_' + str_idx + '.pred', 'wb') as handle:
+            pickle.dump((y_val_pred[0], raw_img), handle, protocol=pickle.HIGHEST_PROTOCOL)

@@ -90,49 +90,17 @@ def show_masked_img(roads_tensor, cars_tensor, raw_img):
     image.show()
 
 if __name__ == "__main__":
-    validation_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
+    import pickle
+    directory = 'dataset/car_preds'
+    num_of_files = len([name for name in os.listdir(directory) if os.path.isfile(os.path.join(directory, name))])
     
-    roads_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
-    roads_val_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', "roads", transform=validation_transform)
+    for idx in range(1, num_of_files + 1):
+        str_idx = str(idx)
 
-    roads_loader = torch.utils.data.DataLoader(roads_val_dataset)
+        with open('dataset/car_preds/prediction_' + str_idx + '.pred', 'rb') as handle:
+            cars_pred, _ = pickle.load(handle)
 
-    road_predictions = []
+        with open('dataset/road_preds/prediction_' + str_idx + '.pred', 'rb') as handle:
+            roads_pred, raw_img = pickle.load(handle)
 
-    for idx, roads_batch in enumerate(roads_loader):
-        if use_gpu:
-            road_inputs = Variable(roads_batch['X'].cuda())
-            road_labels = Variable(roads_batch['Y'].cuda())
-        else:
-            road_inputs, road_labels = Variable(roads_batch['X']), Variable(roads_batch['Y'])
-        roads_pred = roads_model(road_inputs)
-        road_predictions.append(roads_pred)
-
-    torch.cuda.empty_cache()
-
-    cars_model = torch.load("models/cars-CrossEnt_batch2_epoch100_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
-    cars_val_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', "cars", transform=validation_transform)
-
-    cars_loader = torch.utils.data.DataLoader(cars_val_dataset)
-
-    car_predictions = []
-
-    for idx, cars_batch in enumerate(cars_loader):
-        if use_gpu:
-            car_inputs = Variable(cars_batch['X'].cuda())
-            car_labels = Variable(cars_batch['Y'].cuda())
-        else:
-            car_inputs, car_labels = Variable(cars_batch['X']), Variable(cars_batch['Y'])
-        cars_pred = cars_model(road_inputs)
-        car_predictions.append(cars_pred)
-
-    torch.cuda.empty_cache()
-
-    for idx, (roads_pred, cars_pred) in enumerate(zip(road_predictions, car_predictions)):
-        str_idx = str(idx + 1)
-        img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
-        raw_img = PIL.Image.open("dataset/validation_imgs/" + img_name).convert('RGB')
-        show_masked_img(roads_pred[0], cars_pred[0], raw_img)
+        show_masked_img(roads_pred, cars_pred, raw_img)
