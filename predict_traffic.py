@@ -25,7 +25,7 @@ def show_masked_img(roads_tensor, cars_tensor, raw_img):
     # Convert raw_img to numpy array
     img_array = np.array(raw_img).astype(np.uint8)
     # Make the image more opaque
-    # img_array //= 3
+    img_array //= 2
     # img_array *= 2
     # Create array of 255
     colored_array = np.zeros_like(img_array[:,:,0]) + 255
