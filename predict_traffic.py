@@ -79,47 +79,59 @@ def show_masked_img(roads_tensor, cars_tensor, raw_img):
     # Creating masks
     roads_mask = colored_array - img_array[:,:,0]
     cars_mask = colored_array - img_array[:,:,2]
-    # mask[mask > 255] = 255
     roads_mask *= roads_pred.astype(np.uint8)
     cars_mask *= cars_pred.astype(np.uint8)
 
     # Create image
     img_array[:,:,0] += roads_mask
     img_array[:,:,2] += cars_mask
-    # img_array[:,:,1] //= 2
-    # img_array[:,:,2] //= 2
     image = Image.fromarray(img_array, 'RGB')
     # image.save('preview2.png')
     image.show()
 
 if __name__ == "__main__":
-    roads_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
-    cars_model = torch.load("models/cars-CrossEnt_batch2_epoch100_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
-
     validation_transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
+    
+    roads_model = torch.load("models/FCNs-BCEWithLogits_batch3_epoch90_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
     roads_val_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', "roads", transform=validation_transform)
-    cars_val_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', "cars", transform=validation_transform)
 
     roads_loader = torch.utils.data.DataLoader(roads_val_dataset)
-    cars_loader = torch.utils.data.DataLoader(cars_val_dataset)
 
-    for idx, (roads_batch, cars_batch) in enumerate(zip(roads_loader, cars_loader)):
+    road_predictions = []
+
+    for idx, roads_batch in enumerate(roads_loader):
         if use_gpu:
             road_inputs = Variable(roads_batch['X'].cuda())
             road_labels = Variable(roads_batch['Y'].cuda())
+        else:
+            road_inputs, road_labels = Variable(roads_batch['X']), Variable(roads_batch['Y'])
+        roads_pred = roads_model(road_inputs)
+        road_predictions.append(roads_pred)
+
+    torch.cuda.empty_cache()
+
+    cars_model = torch.load("models/cars-CrossEnt_batch2_epoch100_RMSprop_scheduler-step50-gamma0.5_lr0.0001_momentum0_w_decay1e-05")
+    cars_val_dataset = TensorDataset('dataset/validation_imgs', 'dataset/validation_masks', "cars", transform=validation_transform)
+
+    cars_loader = torch.utils.data.DataLoader(cars_val_dataset)
+
+    car_predictions = []
+
+    for idx, cars_batch in enumerate(cars_loader):
+        if use_gpu:
             car_inputs = Variable(cars_batch['X'].cuda())
             car_labels = Variable(cars_batch['Y'].cuda())
         else:
-            road_inputs, road_labels = Variable(roads_batch['X']), Variable(roads_batch['Y'])
             car_inputs, car_labels = Variable(cars_batch['X']), Variable(cars_batch['Y'])
-        roads_pred = roads_model(road_inputs)
         cars_pred = cars_model(road_inputs)
-        # loss_val = criterion(y_val_pred, labels)
-        # print("Val loss:", loss_val.item())
+        car_predictions.append(cars_pred)
 
+    torch.cuda.empty_cache()
+
+    for idx, (roads_pred, cars_pred) in enumerate(zip(road_predictions, car_predictions)):
         str_idx = str(idx + 1)
         img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
         raw_img = PIL.Image.open("dataset/validation_imgs/" + img_name).convert('RGB')
