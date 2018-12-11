@@ -64,7 +64,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 if args.validate:
     model = torch.load('models/' + model_name)
 else:
-    for epoch in range(10):
+    for epoch in range(200):
         for batch in loader:
 
             x_var = Variable(batch['X'].cuda())
