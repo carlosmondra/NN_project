@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 n_class = 2
 batch_size = 2
-epochs = 100
+epochs = 15
 lr = 1e-4
 momentum = 0
 w_decay = 1e-5

@@ -20,15 +20,14 @@ raw_imgs_dir = 'dataset/raw_imgs'
 masks_dir = 'dataset/masks'
 validation_imgs = 'dataset/validation_imgs'
 validation_masks = 'dataset/validation_masks'
+pred_imgs = 'dataset/road_pred_imgs'
 
 if args.architecture == '1':
     model_name = "First_Architecture"
     predictions_path = 'dataset/first_road_preds/prediction_'
-    pred_imgs = 'dataset/road_pred_imgs'
 else:
     model_name = "Second_Architecture"
     predictions_path = 'dataset/second_road_preds/prediction_'
-    pred_imgs = 'dataset/car_pred_imgs'
 
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -46,11 +45,11 @@ transform = transforms.Compose([
 # print(soft)
 
 if args.architecture == '1':
-    from lib import SecondModel
-    model = SecondModel().cuda()
-else:
     from lib import FirstModel
     model = FirstModel().cuda()
+else:
+    from lib import SecondModel
+    model = SecondModel().cuda()
 
 from lib import TensorDataset
 dataset = TensorDataset(raw_imgs_dir, masks_dir, "roads", transform=transform)
