@@ -6,7 +6,7 @@ from torchvision.models.vgg import VGG
 
 class FCNs(nn.Module):
 
-    def __init__(self, pretrained_net, n_class):
+    def __init__(self, pretrained_net, n_class, last_layer):
         super().__init__()
         self.n_class = n_class
         self.pretrained_net = pretrained_net
@@ -21,7 +21,10 @@ class FCNs(nn.Module):
         self.bn4 = nn.BatchNorm2d(64)
         self.deconv5 = nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1, dilation=1, output_padding=1)
         self.bn5 = nn.BatchNorm2d(32)
-        self.classifier = nn.Conv2d(32, n_class, kernel_size=1)
+        if last_layer is None:
+            self.classifier = nn.Conv2d(32, n_class, kernel_size=1)
+        else:
+            self.classifier = last_layer
 
     def forward(self, x):
         output = self.pretrained_net(x)

@@ -57,8 +57,7 @@ class SecondModel(torch.nn.Module):
         self.conv6 = torch.nn.Conv2d(16, 8, 5, padding=2)
         self.conv_tran6 = torch.nn.ConvTranspose2d(8, 8, 2, stride=2, padding=0)
         self.conv7 = torch.nn.Conv2d(8, 2, 5, padding=2)
-
-        self.upsample = torch.nn.Upsample(scale_factor=2)
+        
         self.max_pool = torch.nn.MaxPool2d(2, stride=2)
         self.relu = torch.nn.ReLU()
 
@@ -79,7 +78,51 @@ class SecondModel(torch.nn.Module):
 
         h6 = self.relu(self.conv_tran5(self.relu(self.conv5(h5))))
         h7 = self.relu(self.conv_tran6(self.relu(self.conv6(h6))))
-        # h7 = self.upsample(h1)
+        h8 = self.conv7(h7)
+
+        # x = F.relu(self.conv1(x))
+        return h8
+
+class LastModel(torch.nn.Module):
+    def __init__(self, input_depth, output_depth):
+        super(LastModel, self).__init__()
+        self.conv1 = torch.nn.Conv2d(input_depth, 8, 5, padding=2)
+        # self.conv_dilation1 = torch.nn.Conv2d(8, 8, 5, padding=2, dilation=1)
+        self.conv2 = torch.nn.Conv2d(8, 16, 5, padding=2)
+        # self.conv_dilation2 = torch.nn.Conv2d(16, 16, 5, padding=2, dilation=1)
+        self.conv3 = torch.nn.Conv2d(16, 32, 3, padding=1)
+        # self.conv_dilation3 = torch.nn.Conv2d(32, 32, 3, padding=1, dilation=1)
+
+        self.conv4 = torch.nn.Conv2d(32, 32, 3, padding=1)
+        self.conv4_2 = torch.nn.Conv2d(32, 32, 3, padding=1)
+        self.conv_tran4 = torch.nn.ConvTranspose2d(32, 32, 2, stride=2, padding=0)
+
+        self.conv5 = torch.nn.Conv2d(32, 16, 3, padding=1)
+        self.conv_tran5 = torch.nn.ConvTranspose2d(16, 16, 2, stride=2, padding=0)
+        self.conv6 = torch.nn.Conv2d(16, 8, 5, padding=2)
+        self.conv_tran6 = torch.nn.ConvTranspose2d(8, 8, 2, stride=2, padding=0)
+        self.conv7 = torch.nn.Conv2d(8, output_depth, 5, padding=2)
+        
+        self.max_pool = torch.nn.MaxPool2d(2, stride=2)
+        self.relu = torch.nn.ReLU()
+
+    def forward(self, x):
+        # This are dummy declarations
+        # pre_h1 = self.relu(self.conv_dilation1(self.relu(self.conv1(x))))
+        pre_h1 = self.relu(self.conv1(x))
+        h1 = self.max_pool(pre_h1)
+        # pre_h2 = self.relu(self.conv_dilation2(self.relu(self.conv2(h1))))
+        pre_h2 = self.relu(self.conv2(h1))
+        h2 = self.max_pool(pre_h2)
+        # pre_h3 = self.relu(self.conv_dilation3(self.relu(self.conv3(h2))))
+        pre_h3 = self.relu(self.conv3(h2))
+        h3 = self.max_pool(pre_h3)
+
+        h4 = self.relu(self.conv4(h3))
+        h5 = self.relu(self.conv_tran4(self.relu(self.conv4_2(h4))))
+
+        h6 = self.relu(self.conv_tran5(self.relu(self.conv5(h5))))
+        h7 = self.relu(self.conv_tran6(self.relu(self.conv6(h6))))
         h8 = self.conv7(h7)
 
         # x = F.relu(self.conv1(x))
@@ -117,7 +160,7 @@ class TensorDataset(torch.utils.data.Dataset):
         sample = {'X':image, 'Y':labels}
         return sample
 
-def get_simple_masked_img(pt_tensor, raw_img, img_name, persist=False, show=False):
+def get_simple_masked_img(pt_tensor, raw_img, pred_imgs, img_name, persist=False, show=False):
     y_pred_np = pt_tensor.cpu().detach().numpy()
     img_r = y_pred_np[1]
     img_b = y_pred_np[0]

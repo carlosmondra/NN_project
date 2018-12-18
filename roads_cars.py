@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 n_class = 2
 batch_size = 2
-epochs = 15
+epochs = 200
 lr = 1e-4
 momentum = 0
 w_decay = 1e-5
@@ -57,7 +57,8 @@ model_path = os.path.join(model_dir, configs)
 use_gpu = torch.cuda.is_available()
 
 vgg_model = VGGNet(requires_grad=True, remove_fc=True, model='vgg16')
-fcn_model = FCNs(pretrained_net=vgg_model, n_class=n_class)
+from lib import LastModel
+fcn_model = FCNs(pretrained_net=vgg_model, n_class=n_class, last_layer=LastModel(32, n_class))
 
 if use_gpu:
     ts = time.time()
@@ -130,6 +131,6 @@ if __name__ == "__main__":
         str_idx = str(idx + 1)
         img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
         raw_img = Image.open(validation_imgs + "/" + img_name).convert('RGB')
-        get_simple_masked_img(y_val_pred[0], raw_img, img_name, args.persist, args.show)
+        get_simple_masked_img(y_val_pred[0], raw_img, pred_imgs, img_name, args.persist, args.show)
         with open(predictions_path + str_idx + '.pred', 'wb') as handle:
             pickle.dump((y_val_pred[0], raw_img), handle, protocol=pickle.HIGHEST_PROTOCOL)
