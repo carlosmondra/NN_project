@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 import os
 
-def show_masked_img(roads_tensor, cars_tensor, raw_img):
+def show_masked_img(roads_tensor, cars_tensor, raw_img, img_name):
     # Convert to numpy
     roads_pred = roads_tensor.cpu().detach().numpy()
     cars_pred = cars_tensor.cpu().detach().numpy()
@@ -40,7 +40,7 @@ def show_masked_img(roads_tensor, cars_tensor, raw_img):
     img_array[:,:,0] += roads_mask
     img_array[:,:,2] += cars_mask
     image = Image.fromarray(img_array, 'RGB')
-    # image.save('preview2.png')
+    image.save('dataset/traffic/' + img_name)
     image.show()
 
 def get_traffic_level(roads_tensor, cars_tensor):
@@ -72,13 +72,14 @@ def get_traffic_level(roads_tensor, cars_tensor):
     car_pixels = np.sum(cars_pred)
     traffic = car_pixels / road_pixels
     # print("Traffic", traffic)
-    if traffic < 0.2:
-        return "No traffic"
-    if traffic < 0.5:
-        return "Moderate traffic"
-    if traffic < 0.8:
-        return "Traffic"
-    return "Heavy traffic"
+    return traffic
+    # if traffic < 0.2:
+    #     return "No traffic"
+    # if traffic < 0.5:
+    #     return "Moderate traffic"
+    # if traffic < 0.8:
+    #     return "Traffic"
+    # return "Heavy traffic"
 
 if __name__ == "__main__":
     import pickle
@@ -93,6 +94,7 @@ if __name__ == "__main__":
 
         with open('dataset/road_preds/prediction_' + str_idx + '.pred', 'rb') as handle:
             roads_pred, raw_img = pickle.load(handle)
-
-        show_masked_img(roads_pred, cars_pred, raw_img)
-        # print(get_traffic_level(roads_pred, cars_pred))
+        
+        img_name = ('0' * (7 - len(str_idx) + 1)) + str_idx + '.png'
+        show_masked_img(roads_pred, cars_pred, raw_img, img_name)
+        print(get_traffic_level(roads_pred, cars_pred))
