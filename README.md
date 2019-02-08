@@ -3,7 +3,8 @@
 We aim to semantically segment a road and cars in an image by implementing a Fully Convolutional Network that is, given an image, we are able to predict which pixels of the image are roads and cars. We use 125 training images of satellite imagery from the Google Maps API and create the training masks manually. We also use transfer learning and VGGNet trained on a classification dataset to boost accuracy. Finally, we propose a simple way to identify the level of traffic in a certain image.
 
 In the images below you can see the result of the project. Note that this is an image from the validation set. We are able to identify roads and cars very accurately with the method described.
-![alt text](example.png){:height="50%" width="50%"}
+![alt text](example.png)
+<img src="example.png" width="100" height="100">
 
 ![alt text](example_result.png)
 
