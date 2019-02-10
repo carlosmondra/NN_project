@@ -4,18 +4,8 @@ We aim to semantically segment a road and cars in an image by implementing a Ful
 
 In the images below you can see the result of the project. Note that this is an image from the validation set. We are able to identify roads and cars very accurately with the method described.
 
-<center>
-  <table style="border: none;">
-    <tr>
-      <td>
-        <img src="https://raw.githubusercontent.com/clankster99/NN_project/master/example.png" width="320" height="320" align="middle" style="margin:10px">
-      </td>
-      <td>
-        <img src="https://raw.githubusercontent.com/clankster99/NN_project/master/example_result.png" width="320" height="320" align="middle" style="margin:10px">
-      </td>
-    </tr>
-  </table>
-</center>
+![alt text](https://raw.githubusercontent.com/clankster99/NN_project/SemanticSegmentation.png)
+
 
 [Here](https://github.com/clankster99/NN_project/blob/master/project_paper.pdf) you can find the paper with all the technical details of the project.
 
