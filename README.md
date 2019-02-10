@@ -8,10 +8,10 @@ In the images below you can see the result of the project. Note that this is an 
   <table style="border: none;">
     <tr>
       <td>
-        <img src="example.png" width="320" height="320" align="middle" style="margin:10px">
+        <img src="https://raw.githubusercontent.com/clankster99/NN_project/master/example.png" width="320" height="320" align="middle" style="margin:10px">
       </td>
       <td>
-        <img src="example_result.png" width="320" height="320" align="middle" style="margin:10px">
+        <img src="https://raw.githubusercontent.com/clankster99/NN_project/master/example_result.png" width="320" height="320" align="middle" style="margin:10px">
       </td>
     </tr>
   </table>
